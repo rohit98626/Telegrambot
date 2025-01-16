@@ -2,13 +2,24 @@ import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
+from dotenv import load_dotenv
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
 # Define the /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Hello! Welcome to xtr bot.")
 
 # Define the /help command
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Available commands:\n/start - Welcome message\n/help - List commands\n/files - List available files and projects\n/getfile <file_name> - Get a specific file or project link\n/social - List social media links")
+    await update.message.reply_text(
+        "Available commands:\n"
+        "/start - Welcome message\n"
+        "/help - List commands\n"
+        "/files - List available files and projects\n"
+        "/getfile <file_name> - Get a specific file or project link\n"
+        "/social - List social media links"
+    )
 
 # File paths or Project links
 files_and_projects = {
@@ -28,10 +39,9 @@ social_media_links = {
 # Define the /social command
 async def social(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = "My Social Media Links:\n"
-    for key in social_media_links:
-        message += f"- {key}: {social_media_links[key]}\n"
+    for key, value in social_media_links.items():
+        message += f"- {key}: {value}\n"
     await update.message.reply_text(message)
-
 
 # /files command to list available files and projects
 async def files(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -64,8 +74,11 @@ async def getfile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Main function to start the bot
 def main():
-    # Replace 'YOUR_TOKEN' with the token you got from BotFather
-    BOT_TOKEN = "7381808982:AAFJ4686wdxzKbUxG7zKVDFG2vRKiRJruwI"  # Store your bot token in an environment variable
+    # Get the bot token from environment variables
+    BOT_TOKEN = os.getenv("BOT_TOKEN", "7381808982:AAFJ4686wdxzKbUxG7zKVDFG2vRKiRJruwI")
+    if not BOT_TOKEN:
+        raise ValueError("BOT_TOKEN environment variable is not set")
+
     application = Application.builder().token(BOT_TOKEN).build()
 
     # Register command handlers
@@ -75,8 +88,24 @@ def main():
     application.add_handler(CommandHandler("getfile", getfile))
     application.add_handler(CommandHandler("social", social))
 
-    # Start the bot
-    application.run_polling()
+    # Choose between polling and webhook
+    USE_WEBHOOK = os.getenv("USE_WEBHOOK", "False").lower() == "true"
+
+    if USE_WEBHOOK:
+        # Webhook setup
+        PORT = int(os.getenv("PORT", 8443))
+        WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+        if not WEBHOOK_URL:
+            raise ValueError("WEBHOOK_URL environment variable is not set")
+
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            webhook_url=WEBHOOK_URL
+        )
+    else:
+        # Long polling setup
+        application.run_polling()
 
 if __name__ == "__main__":
     main()

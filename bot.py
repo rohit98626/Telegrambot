@@ -23,9 +23,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # File paths or Project links
 files_and_projects = {
-    "portfolio": "https://github.com/rohit98626/portfolio",
-    "YoutubeClone": "https://github.com/rohit98626/youtubeclone",
-    "WeatherApp": "https://github.com/rohit98626/weather"
+    "simplecalculator": "https://github.com/rohit98626/SimpleCalculator,
+    "youtubeclone": "https://github.com/rohit98626/youtubeclone",
+    "weatherapp": "https://github.com/rohit98626/weather"
 }
 
 # Social Media Links
